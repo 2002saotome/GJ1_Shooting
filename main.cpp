@@ -4,7 +4,7 @@
 const char TITLE[] = "Shooting!!";
 
 // ウィンドウ横幅
-const int WIN_WIDTH = 600;
+const int WIN_WIDTH = 600;;
 
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 400;
