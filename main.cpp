@@ -50,7 +50,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//敵             // 1   2   3   4   5   6   7    8    9    10   11   12  13  14  15  16  17   18   19   20   21   22   23  24
 	int EnemyX[24] = { 150,300,450,600,750,900,1050,1200,1350,1500,1650,1800,220,370,530,670,820,970,1120,1270,1420,1570,1720,1870};
-	int EnemyY[24] = { 0,0,0,0,0,0,0,0,0,0,0,0,200,200,200,200,200, 200, 200, 200, 200, 200, 200,200};
+	int EnemyY[24] = { 0,0,0,0,0,0,0,0,0,0,0,0,400,400,400,400,400, 400, 400, 400, 400, 400, 400,400};
 	int EnemyR[24] = {32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32};
 	int EnemyFlag[24] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
@@ -152,7 +152,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			PlayerY = 830;//1   2   3   4   5     6    7    8    9   10   11  12  13 14   15   16   17   18   19   20     
 			//EnemyX[20] =  {200,400,600,800,1000,1200,1400,1600,1800,1900,200,400,600,800,1000,1200,1400,1600,1800,1900};
 			//EnemyY[20] = {};
-			PlayerLife = 3;
+			PlayerLife = 27;
 			PlayerBeamFlag = 0;
 			PlayerBeamRadius = 64;
 			PlayerBeamX = 850;
@@ -248,6 +248,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					//下に10加速
 					EnemyY[i] += 10;
 				}
+				
 			}
 
 			for (int i = 0; i < 24; i++)
@@ -300,10 +301,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//プレイヤーと敵の当たり判定
 			for (int i = 0; i < 24; i++)
 			{
-				if (EnemyFlag[i] == 1 && PlayerLife == 3)
+				if (EnemyFlag[i] == 1 && PlayerLife <=27)
 				{
-					dx2 = abs(EnemyX[i] - PlayerX)*(EnemyX[i]-PlayerX);
-					dy2 = abs(EnemyY[i] - PlayerY)*(EnemyY[i]-PlayerY);
+					dx2 = abs(EnemyX[i] - PlayerX);
+					dy2 = abs(EnemyY[i] - PlayerY);
 					//半径
 					int R = (PlayerRadius + EnemyR[i]) * (PlayerRadius + EnemyR[i]);
 
@@ -317,11 +318,18 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//リセット(R)
 			if (keys[KEY_INPUT_R] == 1 && oldkeys[KEY_INPUT_R] == 0)
 			{
-				PlayerLife = 3;
+				PlayerLife = 27;
 			}
 
 			//タイマーの処理//
 			Timer-=1;
+			for (int i = 0; i < 24; i++)
+			{
+				if (Timer < 20)
+				{
+					EnemyX[i] += 10;
+				}
+			}
 
 			break;
 
@@ -371,20 +379,20 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 
 			//ライフ(プレイヤー)
-			if (PlayerLife == 3)
+			if (PlayerLife == 27)
 			{
 				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
 				DrawGraph(50, 50, PlayerLifeGraphHandle, true);
 				DrawGraph(100, 50, PlayerLifeGraphHandle, true);
 			}
 
-			if (PlayerLife == 2)
+			if (PlayerLife<=18&&PlayerLife>9)
 			{
 				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
 				DrawGraph(50, 50, PlayerLifeGraphHandle, true);
 			}
 
-			if (PlayerLife == 1)
+			if (PlayerLife<=9)
 			{
 				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
 			}
@@ -611,15 +619,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				DrawGraph(PlayerBeamX-PlayerBeamR, PlayerBeamY-PlayerBeamR, PlayerBombGraphHandle,true);
 			}
 
-			SetFontSize(16);
-			DrawFormatString(0, 0, GetColor(255, 0, 0), "PlayerX:%d", PlayerX);
-			DrawFormatString(0, 20, GetColor(255, 0, 0), "PlayerY:%d", PlayerY);
-			DrawFormatString(0, 40, GetColor(255, 0, 0), "PlayerBeamX:%d", PlayerBeamX);
-			DrawFormatString(0, 60, GetColor(255, 0, 0), "PlayerBeamY:%d", PlayerBeamY);
-			//ビーム(プレイヤー)
-			DrawFormatString(0, 80, GetColor(255, 0, 0), "PlayerBeamFlag:%d", PlayerBeamFlag);
-			DrawFormatString(0, 100, GetColor(255, 0, 0), "Timer:%d", Timer);
-			DrawFormatString(0, 120, GetColor(255, 0, 0), "PlayerLife:%d", PlayerLife);
+			//SetFontSize(16);
+			//DrawFormatString(0, 0, GetColor(255, 0, 0), "PlayerX:%d", PlayerX);
+			//DrawFormatString(0, 20, GetColor(255, 0, 0), "PlayerY:%d", PlayerY);
+			//DrawFormatString(0, 40, GetColor(255, 0, 0), "PlayerBeamX:%d", PlayerBeamX);
+			//DrawFormatString(0, 60, GetColor(255, 0, 0), "PlayerBeamY:%d", PlayerBeamY);
+			////ビーム(プレイヤー)
+			//DrawFormatString(0, 80, GetColor(255, 0, 0), "PlayerBeamFlag:%d", PlayerBeamFlag);
+			//DrawFormatString(0, 100, GetColor(255, 0, 0), "Timer:%d", Timer);
+			//DrawFormatString(0, 120, GetColor(255, 0, 0), "PlayerLife:%d", PlayerLife);
 
 			break;
 		}
