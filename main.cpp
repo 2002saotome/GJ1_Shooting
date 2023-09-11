@@ -44,14 +44,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//自機
 	int PlayerX = 0;
 	int PlayerY = 0;
-	int PlayerRadius = 0;
+	int PlayerRadius = 64;
 	int PlayerLife = 3;
 	int PlayerSpeed = 20;
 
 	//敵             // 1   2   3   4   5   6   7    8    9    10   11   12  13  14  15  16  17   18   19   20   21   22   23  24
 	int EnemyX[24] = { 150,300,450,600,750,900,1050,1200,1350,1500,1650,1800,220,370,530,670,820,970,1120,1270,1420,1570,1720,1870};
-	int EnemyY[24] = { 0,0,0,0,0,0,0,0,0,0,0,0,600,600,600,600,600, 600, 600, 600, 600, 600, 600,600};
-	int EnemyR[24] = {64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64};
+	int EnemyY[24] = { 0,0,0,0,0,0,0,0,0,0,0,0,200,200,200,200,200, 200, 200, 200, 200, 200, 200,200};
+	int EnemyR[24] = {32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32};
 	int EnemyFlag[24] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
 	//弾
@@ -72,6 +72,20 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int dx;
 	int dy;
 
+	//敵とプレイヤーの当たり判定
+	int dx2;
+	int dy2;
+
+	//敵2(仮)
+	int enemyX = 50;
+	int enemyY = 200;
+	int enemyR = 64;
+	int enemyFlag = 1;
+	int Dx;
+	int Dy;
+
+	
+
 
 	//リソース
 	
@@ -83,21 +97,29 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int PlayerBombGraphHandle;
 	PlayerBombGraphHandle = LoadGraph("Bomb.png");
 
+	//ライフ(プレイヤー)
+	int PlayerLifeGraphHandle;
+	PlayerLifeGraphHandle = LoadGraph("Life.png");
+
 	//敵
 	int EnemyGraphHandle;
 	EnemyGraphHandle = LoadGraph("Enemy.png");
 
-	//タイマー
-	int TimerGraphHandle;
-	TimerGraphHandle = LoadGraph("");
-
 	//タイトル
 	int TitleGraphHandle;
-	TitleGraphHandle = LoadGraph("");
+	TitleGraphHandle = LoadGraph("Title.png");
 
 	//ゲーム背景
 	int GraphDrawHandle;
 	GraphDrawHandle = LoadGraph("DrawGraph.png");
+
+	//ゲームクリア
+	int GameClearGraphHandle;
+	GameClearGraphHandle = LoadGraph("Game_Clear.png");
+
+	//ゲームオーバー
+	int GameOverGraphHandle;
+	GameOverGraphHandle = LoadGraph("Game_Over.png");
 
 
 	// 最新のキーボード情報用
@@ -109,6 +131,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// ゲームループ
 	while (true) {
 		// 最新のキーボード情報だったものは1フレーム前のキーボード情報として保存
+		
 		// 最新のキーボード情報を取得
 		GetHitKeyStateAll(keys);
 
@@ -196,9 +219,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 
 			//下
-			if (PlayerY > 830)
+			if (PlayerY > 900)
 			{
-				PlayerY = 830;
+				PlayerY = 900;
 			}
 			
 
@@ -209,7 +232,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				if (PlayerBeamFlag == 0)
 				{
 					//プレイヤーの座標を弾に代入
-					PlayerBeamX = PlayerX + 50;
+					PlayerBeamX = PlayerX +5;
 					PlayerBeamY = PlayerY - 20;
 					//弾を存在させる
 					PlayerBeamFlag = 1;
@@ -232,16 +255,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				if (EnemyY[i] == 1000)
 				{
 					//一番下に行ったら敵を消す
-					EnemyFlag[i] = 0;
-				}
-			}
-			for (int i = 0; i < 24; i++)
-			{
-				if (EnemyFlag[i] == 0)
-				{
+					EnemyY[i] = 0;
 					
 				}
+				if (EnemyY[i] == 0)
+			    {
+					EnemyFlag[i] = 1;
+			    }
 			}
+			
+			
 
 			
 			//ビーム処理//
@@ -269,16 +292,46 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					if (dx < 50 && dy < 50)
 					{
 						EnemyFlag[i] = 0;
+						PlayerBeamFlag = 0;
 					}
 			    }
 			}
 
 			//プレイヤーと敵の当たり判定
+			for (int i = 0; i < 24; i++)
+			{
+				if (EnemyFlag[i] == 1 && PlayerLife == 3)
+				{
+					dx2 = abs(EnemyX[i] - PlayerX)*(EnemyX[i]-PlayerX);
+					dy2 = abs(EnemyY[i] - PlayerY)*(EnemyY[i]-PlayerY);
+					//半径
+					int R = (PlayerRadius + EnemyR[i]) * (PlayerRadius + EnemyR[i]);
 
-			
+					if (dx2<50&&dy2<50)
+					{
+						PlayerLife--;
+					}
+				}
+			}
+
+			//リセット(R)
+			if (keys[KEY_INPUT_R] == 1 && oldkeys[KEY_INPUT_R] == 0)
+			{
+				PlayerLife = 3;
+			}
 
 			//タイマーの処理//
 			Timer-=1;
+
+			break;
+
+			//ゲームクリア
+			case 3:
+
+			break;
+
+			//ゲームオーバー
+			case 4:
 
 			break;
 		}
@@ -291,20 +344,22 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//タイトル
 		case 0:
 			DrawGraph(0, 0, TitleGraphHandle, true);
-			DrawFormatString(0, 0, GetColor(255, 0, 0), "Title", scene);
 			break;
 
 			//ゲーム説明
 		case 1:
-			DrawFormatString(0, 0, GetColor(255, 0, 0), "Explanation", scene);
+
 			break;
 
 			//ゲームプレイ
 		case 2:
 			//背景
 			DrawGraph(0, 0, GraphDrawHandle, true);
-			//プレイヤー
-			DrawGraph(PlayerX, PlayerY, PlayerGraphHandle, true);
+			if (PlayerLife >= 1)
+			{
+				//プレイヤー
+				DrawGraph(PlayerX-PlayerRadius, PlayerY-PlayerRadius, PlayerGraphHandle, true);
+			}
 
 			for (int i = 0; i < 24; i++)
 			{
@@ -315,6 +370,248 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				}
 			}
 
+			//ライフ(プレイヤー)
+			if (PlayerLife == 3)
+			{
+				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
+				DrawGraph(50, 50, PlayerLifeGraphHandle, true);
+				DrawGraph(100, 50, PlayerLifeGraphHandle, true);
+			}
+
+			if (PlayerLife == 2)
+			{
+				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
+				DrawGraph(50, 50, PlayerLifeGraphHandle, true);
+			}
+
+			if (PlayerLife == 1)
+			{
+				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
+			}
+
+			if (enemyFlag == 1)
+			{
+				DrawGraph(enemyX-enemyR, enemyY-enemyR, EnemyGraphHandle, true);
+			}
+
+			
+			//タイマー//
+			if (Timer < 1500 && Timer>1450)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "30秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1450 && Timer>1400)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "29秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1400 && Timer>1350)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "28秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1350 && Timer>1300)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "27秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1300 && Timer>1250)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "26秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1250 && Timer>1200)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "25秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1200 && Timer>1150)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "24秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1150 && Timer>1100)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "23秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1100 && Timer>1050)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "22秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1050 && Timer>1000)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(0, 0, 255), "21秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 1000 && Timer>950)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "20秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 950 && Timer>900)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "19秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 900 && Timer>850)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "18秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 850 && Timer>800)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "17秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 800 && Timer>750)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "16秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 750 && Timer>700)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "15秒", Timer);
+				SetFontSize(64);
+			}
+			
+			if (Timer < 700 && Timer>650)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "14秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 650 && Timer>600)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "13秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 600 && Timer>550)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "12秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 550 && Timer>500)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 255, 0), "11秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 500 && Timer>450)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "10秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 450 && Timer>400)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "9秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 400 && Timer>350)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "8秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 350 && Timer>300)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "7秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 300 && Timer>250)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "6秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 250 && Timer>200)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "5秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 200 && Timer>150)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "4秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 150 && Timer>100)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "3秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 100 && Timer>50)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "2秒", Timer);
+				SetFontSize(64);
+			}
+
+			if (Timer < 50 && Timer>0)
+			{
+				SetFontSize(64);
+				DrawFormatString(1700, 0, GetColor(255, 0, 0), "1秒", Timer);
+				SetFontSize(64);
+			}
+			//ビーム
+			if (PlayerBeamFlag == 1)
+			{
+				DrawGraph(PlayerBeamX-PlayerBeamR, PlayerBeamY-PlayerBeamR, PlayerBombGraphHandle,true);
+			}
+
+			SetFontSize(16);
 			DrawFormatString(0, 0, GetColor(255, 0, 0), "PlayerX:%d", PlayerX);
 			DrawFormatString(0, 20, GetColor(255, 0, 0), "PlayerY:%d", PlayerY);
 			DrawFormatString(0, 40, GetColor(255, 0, 0), "PlayerBeamX:%d", PlayerBeamX);
@@ -322,12 +619,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//ビーム(プレイヤー)
 			DrawFormatString(0, 80, GetColor(255, 0, 0), "PlayerBeamFlag:%d", PlayerBeamFlag);
 			DrawFormatString(0, 100, GetColor(255, 0, 0), "Timer:%d", Timer);
-			
-			//ビーム
-			if (PlayerBeamFlag == 1)
-			{
-				DrawGraph(PlayerBeamX-PlayerBeamR, PlayerBeamY-PlayerBeamR, PlayerBombGraphHandle,true);
-			}
+			DrawFormatString(0, 120, GetColor(255, 0, 0), "PlayerLife:%d", PlayerLife);
+
 			break;
 		}
 
