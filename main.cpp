@@ -48,21 +48,29 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int PlayerLife = 3;
 	int PlayerSpeed = 20;
 
-	//敵
-	int Enemy[10];
-	int EnemyX = 0;
-	int EnemyY = 0;
-	int EnemyFlag = 0;
+	//敵             // 1   2   3   4   5   6   7    8    9    10   11   12  13  14  15  16  17   18   19   20   21   22   23  24
+	int EnemyX[24] = { 150,300,450,600,750,900,1050,1200,1350,1500,1650,1800,220,370,530,670,820,970,1120,1270,1420,1570,1720,1870};
+	int EnemyY[24] = { 0,0,0,0,0,0,0,0,0,0,0,0,600,600,600,600,600, 600, 600, 600, 600, 600, 600,600};
+	int EnemyR[24] = {64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64};
+	int EnemyFlag[24] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
 	//弾
 	int PlayerBeamX = 0;
 	int PlayerBeamY = 0;
+	int PlayerBeamR = 16;
 	int PlayerBeamRadius = 0;
 	int PlayerBeamSpeed = 30;
 	int PlayerBeamFlag = 0;
 
 	//シーン
 	int scene = 0;
+
+	//タイマー
+	int Timer = 1500;
+	
+	//弾と敵の当たり判定(宣言)
+	int dx;
+	int dy;
 
 
 	//リソース
@@ -118,15 +126,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//初期化
 			//プレイヤー
 			PlayerX = 850;
-			PlayerY = 830;
-			EnemyX = 500;
-			EnemyY = 0;
+			PlayerY = 830;//1   2   3   4   5     6    7    8    9   10   11  12  13 14   15   16   17   18   19   20     
+			//EnemyX[20] =  {200,400,600,800,1000,1200,1400,1600,1800,1900,200,400,600,800,1000,1200,1400,1600,1800,1900};
+			//EnemyY[20] = {};
 			PlayerLife = 3;
 			PlayerBeamFlag = 0;
-			PlayerBeamRadius = 16;
+			PlayerBeamRadius = 64;
 			PlayerBeamX = 850;
 			PlayerBeamY = 830;
-			EnemyFlag = 1;
+			Timer = 1500;
+			//EnemyFlag[10] = {1,1,1,1,1,1,1,1,1,1};
 
 			//敵
 
@@ -207,18 +216,35 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				}
 			}
 
-			if (EnemyY < 1000)
+			//敵の処理//
+			//敵のスピード
+			for (int i = 0; i < 24; i++)
 			{
-				EnemyY += 20;
+				if (EnemyY[i] < 1000)
+				{
+					//下に10加速
+					EnemyY[i] += 10;
+				}
 			}
 
-			if (EnemyY == 1000)
+			for (int i = 0; i < 24; i++)
 			{
-				EnemyFlag = 0;
+				if (EnemyY[i] == 1000)
+				{
+					//一番下に行ったら敵を消す
+					EnemyFlag[i] = 0;
+				}
+			}
+			for (int i = 0; i < 24; i++)
+			{
+				if (EnemyFlag[i] == 0)
+				{
+					
+				}
 			}
 
 			
-
+			//ビーム処理//
 			if (PlayerBeamFlag == 1)
 			{
 				//上に移動
@@ -231,6 +257,29 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					PlayerBeamFlag = 0;
 				}
 			}
+
+			//弾と敵の当たり判定
+			for (int i = 0; i < 24; i++)
+			{
+				if (EnemyFlag[i] == 1 && PlayerBeamFlag == 1)
+				{
+					dx = abs(EnemyX[i] - PlayerBeamX);
+					dy = abs(EnemyY[i] - PlayerBeamY);
+
+					if (dx < 50 && dy < 50)
+					{
+						EnemyFlag[i] = 0;
+					}
+			    }
+			}
+
+			//プレイヤーと敵の当たり判定
+
+			
+
+			//タイマーの処理//
+			Timer-=1;
+
 			break;
 		}
 
@@ -257,10 +306,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//プレイヤー
 			DrawGraph(PlayerX, PlayerY, PlayerGraphHandle, true);
 
-			if (EnemyFlag == 1)
+			for (int i = 0; i < 24; i++)
 			{
-				//敵
-				DrawGraph(EnemyX, EnemyY, EnemyGraphHandle, true);
+				if (EnemyFlag[i] == 1)
+				{
+					//敵
+					DrawGraph(EnemyX[i]-EnemyR[i], EnemyY[i]-EnemyR[i], EnemyGraphHandle, true);
+				}
 			}
 
 			DrawFormatString(0, 0, GetColor(255, 0, 0), "PlayerX:%d", PlayerX);
@@ -269,9 +321,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawFormatString(0, 60, GetColor(255, 0, 0), "PlayerBeamY:%d", PlayerBeamY);
 			//ビーム(プレイヤー)
 			DrawFormatString(0, 80, GetColor(255, 0, 0), "PlayerBeamFlag:%d", PlayerBeamFlag);
+			DrawFormatString(0, 100, GetColor(255, 0, 0), "Timer:%d", Timer);
+			
+			//ビーム
 			if (PlayerBeamFlag == 1)
 			{
-				DrawGraph(PlayerBeamX, PlayerBeamY, PlayerBombGraphHandle,true);
+				DrawGraph(PlayerBeamX-PlayerBeamR, PlayerBeamY-PlayerBeamR, PlayerBombGraphHandle,true);
 			}
 			break;
 		}
