@@ -1,7 +1,7 @@
 #include "DxLib.h"
 
 // ウィンドウのタイトルに表示する文字列
-const char TITLE[] = "Shooting!!";
+const char TITLE[] = "3046_Formation Shooting";
 
 // ウィンドウ横幅
 const int WIN_WIDTH = 1900;
@@ -132,6 +132,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int GamePlaySound = LoadSoundMem("BGM/GamePlay.mp3");
 	int GameClearSound = LoadSoundMem("BGM/GameClear.mp3");
 	int GameOverSound = LoadSoundMem("BGM/GameOver.mp3");
+	int GamePlaySoundHard = LoadSoundMem("BGM/BattleBGM.mp3");
 
 	//SE
 	int ShotSE = LoadSoundMem("BGM/Shot.mp3");
@@ -180,6 +181,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//敵
 			//BGM(タイトル)
 			StopSoundMem(GameClearSound);
+			StopSoundMem(GamePlaySoundHard);
 			StopSoundMem(GameOverSound);
 			StopSoundMem(GamePlaySound);
 			PlaySoundMem(TitleSound, DX_PLAYTYPE_LOOP, false);
@@ -370,6 +372,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						EnemyX[i] = 1850;
 					}
 					
+					if (Timer < 750)
+					{
+						StopSoundMem(GamePlaySound);
+						PlaySoundMem(GamePlaySoundHard, DX_PLAYTYPE_LOOP, false);
+					}
 				}
 
 				
@@ -392,6 +399,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//ゲームクリア
 			case 3:
+				StopSoundMem(GamePlaySoundHard);
 				StopSoundMem(GamePlaySound);
 				PlaySoundMem(GameClearSound, DX_PLAYTYPE_LOOP, false);
 				if (keys[KEY_INPUT_RETURN] == 1 && oldkeys[KEY_INPUT_RETURN] == 0)
@@ -402,6 +410,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//ゲームオーバー
 			case 4:
+				StopSoundMem(GamePlaySoundHard);
 				StopSoundMem(GamePlaySound);
 				PlaySoundMem(GameOverSound, DX_PLAYTYPE_LOOP, false);
 				if (keys[KEY_INPUT_RETURN] == 1 && oldkeys[KEY_INPUT_RETURN] == 0)
