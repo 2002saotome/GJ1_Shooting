@@ -91,52 +91,47 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	
 	//プレイヤー
 	int PlayerGraphHandle;
-	PlayerGraphHandle = LoadGraph("Player.png");
+	PlayerGraphHandle = LoadGraph("Resource/Player.png");
 
 	//弾（プレイヤー）
 	int PlayerBombGraphHandle;
-	PlayerBombGraphHandle = LoadGraph("Bomb.png");
+	PlayerBombGraphHandle = LoadGraph("Resource/Bomb.png");
 
 	//ライフ(プレイヤー)
 	int PlayerLifeGraphHandle;
-	PlayerLifeGraphHandle = LoadGraph("Life.png");
+	PlayerLifeGraphHandle = LoadGraph("Resource/Life.png");
 
 	//敵
 	int EnemyGraphHandle;
-	EnemyGraphHandle = LoadGraph("Enemy.png");
+	EnemyGraphHandle = LoadGraph("Resource/Enemy.png");
 
 	//タイトル
 	int TitleGraphHandle;
-	TitleGraphHandle = LoadGraph("Title.png");
+	TitleGraphHandle = LoadGraph("Resource/Title.png");
 
 	//ゲーム説明
 	int OperationGraphHandle;
-	OperationGraphHandle = LoadGraph("Operation_instructions.png");
+	OperationGraphHandle = LoadGraph("Resource/Operation_instructions.png");
 
 	//ゲーム背景
 	int GraphDrawHandle;
-	GraphDrawHandle = LoadGraph("DrawGraph.png");
+	GraphDrawHandle = LoadGraph("Resource/DrawGraph.png");
 
 	//ゲームクリア
 	int GameClearGraphHandle;
-	GameClearGraphHandle = LoadGraph("Game_Clear.png");
+	GameClearGraphHandle = LoadGraph("Resource/Game_Clear.png");
 
 	//ゲームオーバー
 	int GameOverGraphHandle;
-	GameOverGraphHandle = LoadGraph("Game_Over.png");
+	GameOverGraphHandle = LoadGraph("Resource/Game_Over.png");
 
 
-	//BGM,SE
 	//BGM
 	int TitleSound = LoadSoundMem("BGM/Title.mp3");
 	int GamePlaySound = LoadSoundMem("BGM/GamePlay.mp3");
 	int GameClearSound = LoadSoundMem("BGM/GameClear.mp3");
 	int GameOverSound = LoadSoundMem("BGM/GameOver.mp3");
 	int GamePlaySoundHard = LoadSoundMem("BGM/BattleBGM.mp3");
-
-	//SE
-	int ShotSE = LoadSoundMem("BGM/Shot.mp3");
-	int PlayerDamageSE = LoadSoundMem("BGM/PlayerDamage.mp3");
 
 
 	// 最新のキーボード情報用
@@ -255,8 +250,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				if (PlayerBeamFlag == 0)
 				{
-					//SE再生
-					//PlaySoundMem(ShotSE, DX_PLAYTYPE_BACK, false);
 
 					//プレイヤーの座標を弾に代入
 					PlayerBeamX = PlayerX +5;
@@ -337,8 +330,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 					if (dx2<64&&dy2<64)
 					{
-						//SE再生
-						//PlaySoundMem(PlayerDamageSE, DX_PLAYTYPE_NORMAL, false);
+						//ライフを減らす
 						PlayerLife--;
 					}
 				}
@@ -355,6 +347,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			
 				for (int i = 0; i < 24; i++)
 				{
+					//時間以下になったら敵の挙動を変える
 					if (Timer < 1000)
 					{
 						EnemyX[i] += 5;
@@ -374,6 +367,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					
 					if (Timer < 750)
 					{
+						//BGM変更
 						StopSoundMem(GamePlaySound);
 						PlaySoundMem(GamePlaySoundHard, DX_PLAYTYPE_LOOP, false);
 					}
