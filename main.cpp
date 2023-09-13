@@ -125,11 +125,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int GameOverGraphHandle;
 	GameOverGraphHandle = LoadGraph("Game_Over.png");
 
+
 	//BGM,SE
+	//BGM
 	int TitleSound = LoadSoundMem("BGM/Title.mp3");
 	int GamePlaySound = LoadSoundMem("BGM/GamePlay.mp3");
 	int GameClearSound = LoadSoundMem("BGM/GameClear.mp3");
 	int GameOverSound = LoadSoundMem("BGM/GameOver.mp3");
+
+	//SE
+	int ShotSE = LoadSoundMem("BGM/Shot.mp3");
+	int PlayerDamageSE = LoadSoundMem("BGM/PlayerDamage.mp3");
 
 
 	// 最新のキーボード情報用
@@ -173,6 +179,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//敵
 			//BGM(タイトル)
+			StopSoundMem(GameClearSound);
+			StopSoundMem(GameOverSound);
+			StopSoundMem(GamePlaySound);
 			PlaySoundMem(TitleSound, DX_PLAYTYPE_LOOP, false);
 			if (keys[KEY_INPUT_RETURN] == 1 && oldkeys[KEY_INPUT_RETURN] == 0)
 			{
@@ -244,6 +253,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				if (PlayerBeamFlag == 0)
 				{
+					//SE再生
+					//PlaySoundMem(ShotSE, DX_PLAYTYPE_BACK, false);
+
 					//プレイヤーの座標を弾に代入
 					PlayerBeamX = PlayerX +5;
 					PlayerBeamY = PlayerY - 20;
@@ -323,6 +335,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 					if (dx2<64&&dy2<64)
 					{
+						//SE再生
+						//PlaySoundMem(PlayerDamageSE, DX_PLAYTYPE_NORMAL, false);
 						PlayerLife--;
 					}
 				}
@@ -336,13 +350,29 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//タイマーの処理//
 			Timer-=1;
-			for (int i = 0; i < 24; i++)
-			{
-				if (Timer < 20)
+			
+				for (int i = 0; i < 24; i++)
 				{
-					EnemyX[i] += 10;
+					if (Timer < 1000)
+					{
+						EnemyX[i] += 5;
+					}
+					if (EnemyX[i] > 1900)
+					{
+						EnemyX[i] = 0;
+					}
+					if (Timer < 500)
+					{
+						EnemyX[i] -= 10;
+					}
+					if (EnemyX[i] < 0)
+					{
+						EnemyX[i] = 1850;
+					}
+					
 				}
-			}
+
+				
 
 			//ゲームクリア・ゲームオーバーシーン切り替え
 			//ゲームクリア
@@ -352,7 +382,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 
 			//ゲームオーバー
-			if (PlayerLife == 0)
+			if (PlayerLife <= 0)
 			{
 				scene = 4;
 			}
@@ -416,7 +446,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 
 			//ライフ(プレイヤー)
-			if (PlayerLife >= 27)
+			if (PlayerLife <= 27&&PlayerLife>18)
 			{
 				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
 				DrawGraph(50, 50, PlayerLifeGraphHandle, true);
