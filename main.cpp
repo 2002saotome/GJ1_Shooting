@@ -45,7 +45,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int PlayerX = 0;
 	int PlayerY = 0;
 	int PlayerRadius = 64;
-	int PlayerLife = 3;
+	int PlayerLife = 27;
 	int PlayerSpeed = 20;
 
 	//敵             // 1   2   3   4   5   6   7    8    9    10   11   12  13  14  15  16  17   18   19   20   21   22   23  24
@@ -109,6 +109,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int TitleGraphHandle;
 	TitleGraphHandle = LoadGraph("Title.png");
 
+	//ゲーム説明
+	int OperationGraphHandle;
+	OperationGraphHandle = LoadGraph("Operation_instructions.png");
+
 	//ゲーム背景
 	int GraphDrawHandle;
 	GraphDrawHandle = LoadGraph("DrawGraph.png");
@@ -121,6 +125,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int GameOverGraphHandle;
 	GameOverGraphHandle = LoadGraph("Game_Over.png");
 
+	//BGM,SE
+	int TitleSound = LoadSoundMem("BGM/Title.mp3");
+	int GamePlaySound = LoadSoundMem("BGM/GamePlay.mp3");
+	int GameClearSound = LoadSoundMem("BGM/GameClear.mp3");
+	int GameOverSound = LoadSoundMem("BGM/GameOver.mp3");
+
 
 	// 最新のキーボード情報用
 	char keys[256] = {0};
@@ -131,7 +141,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// ゲームループ
 	while (true) {
 		// 最新のキーボード情報だったものは1フレーム前のキーボード情報として保存
-		
+		for (int i = 0; i < 256; i++)
+		{
+			oldkeys[i] = keys[i];
+		}
 		// 最新のキーボード情報を取得
 		GetHitKeyStateAll(keys);
 
@@ -149,20 +162,19 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//初期化
 			//プレイヤー
 			PlayerX = 850;
-			PlayerY = 830;//1   2   3   4   5     6    7    8    9   10   11  12  13 14   15   16   17   18   19   20     
-			//EnemyX[20] =  {200,400,600,800,1000,1200,1400,1600,1800,1900,200,400,600,800,1000,1200,1400,1600,1800,1900};
-			//EnemyY[20] = {};
+			PlayerY = 830;
 			PlayerLife = 27;
 			PlayerBeamFlag = 0;
 			PlayerBeamRadius = 64;
 			PlayerBeamX = 850;
 			PlayerBeamY = 830;
 			Timer = 1500;
-			//EnemyFlag[10] = {1,1,1,1,1,1,1,1,1,1};
+
 
 			//敵
-
-			if (keys[KEY_INPUT_SPACE] == 1 && oldkeys[KEY_INPUT_SPACE] == 0)
+			//BGM(タイトル)
+			PlaySoundMem(TitleSound, DX_PLAYTYPE_LOOP, false);
+			if (keys[KEY_INPUT_RETURN] == 1 && oldkeys[KEY_INPUT_RETURN] == 0)
 			{
 				scene = 1;
 			}
@@ -170,7 +182,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//ゲーム説明
 		case 1:
-			if (keys[KEY_INPUT_SPACE] == 1 && oldkeys[KEY_INPUT_SPACE] == 0)
+			StopSoundMem(TitleSound);
+			if (keys[KEY_INPUT_RETURN] == 1 && oldkeys[KEY_INPUT_RETURN] == 0)
 			{
 				scene = 2;
 			}
@@ -178,6 +191,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//ゲームプレイ
 		case 2:
+			PlaySoundMem(GamePlaySound, DX_PLAYTYPE_LOOP, false);
 			//プレイヤー移動処理
 			if (keys[KEY_INPUT_RIGHT] == 1)
 			{
@@ -228,7 +242,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//弾の発射
 			if (keys[KEY_INPUT_SPACE] == 1 && oldkeys[KEY_INPUT_SPACE] == 0)
 			{
-
 				if (PlayerBeamFlag == 0)
 				{
 					//プレイヤーの座標を弾に代入
@@ -308,7 +321,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					//半径
 					int R = (PlayerRadius + EnemyR[i]) * (PlayerRadius + EnemyR[i]);
 
-					if (dx2<50&&dy2<50)
+					if (dx2<64&&dy2<64)
 					{
 						PlayerLife--;
 					}
@@ -331,16 +344,40 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				}
 			}
 
+			//ゲームクリア・ゲームオーバーシーン切り替え
+			//ゲームクリア
+			if (Timer == 0)
+			{
+				scene = 3;
+			}
+
+			//ゲームオーバー
+			if (PlayerLife == 0)
+			{
+				scene = 4;
+			}
+
+
 			break;
 
 			//ゲームクリア
 			case 3:
-
+				StopSoundMem(GamePlaySound);
+				PlaySoundMem(GameClearSound, DX_PLAYTYPE_LOOP, false);
+				if (keys[KEY_INPUT_RETURN] == 1 && oldkeys[KEY_INPUT_RETURN] == 0)
+				{
+					scene = 0;
+				}
 			break;
 
 			//ゲームオーバー
 			case 4:
-
+				StopSoundMem(GamePlaySound);
+				PlaySoundMem(GameOverSound, DX_PLAYTYPE_LOOP, false);
+				if (keys[KEY_INPUT_RETURN] == 1 && oldkeys[KEY_INPUT_RETURN] == 0)
+				{
+					scene = 0;
+				}
 			break;
 		}
 
@@ -356,7 +393,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//ゲーム説明
 		case 1:
-
+			DrawGraph(0, 0, OperationGraphHandle, true);
 			break;
 
 			//ゲームプレイ
@@ -379,7 +416,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 
 			//ライフ(プレイヤー)
-			if (PlayerLife == 27)
+			if (PlayerLife >= 27)
 			{
 				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
 				DrawGraph(50, 50, PlayerLifeGraphHandle, true);
@@ -395,11 +432,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			if (PlayerLife<=9)
 			{
 				DrawGraph(0, 50, PlayerLifeGraphHandle, true);
-			}
-
-			if (enemyFlag == 1)
-			{
-				DrawGraph(enemyX-enemyR, enemyY-enemyR, EnemyGraphHandle, true);
 			}
 
 			
@@ -619,6 +651,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				DrawGraph(PlayerBeamX-PlayerBeamR, PlayerBeamY-PlayerBeamR, PlayerBombGraphHandle,true);
 			}
 
+			
+
 			//SetFontSize(16);
 			//DrawFormatString(0, 0, GetColor(255, 0, 0), "PlayerX:%d", PlayerX);
 			//DrawFormatString(0, 20, GetColor(255, 0, 0), "PlayerY:%d", PlayerY);
@@ -630,6 +664,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//DrawFormatString(0, 120, GetColor(255, 0, 0), "PlayerLife:%d", PlayerLife);
 
 			break;
+
+			//ゲームクリア
+			case 3:
+			DrawGraph(0, 0, GameClearGraphHandle, true);
+			break;
+
+			//ゲームオーバー
+			case 4:
+			DrawGraph(0, 0, GameOverGraphHandle, true);
+			break;
+
 		}
 
 		//敵
